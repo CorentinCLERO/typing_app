@@ -1,6 +1,10 @@
-import { Component, HostListener } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, HostListener, Injectable } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+
+interface LLMResponse {
+  response: string
+}
 
 @Component({
   selector: 'app-root',
@@ -9,8 +13,27 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css',
 })
 
+
+@Injectable({providedIn: 'root'})
 export class AppComponent {
   phrase: string = 'Je vais pas pouvoir venir ce samedi';
+  constructor(private http: HttpClient) {
+    // function fetchPhraseFromAI() {
+      http.post<LLMResponse>('http://localhost:11434/api/generate', {
+        model: "llama3",
+        prompt: "Make me a French phrase of 20 words (just send me the phrase without anything else)?",
+        stream: false
+      }).subscribe(res => {
+        this.phraseArray = res.response.split('');
+        console.log("réponse de l'api : ", res.response)
+      })
+    // }
+
+    // fetchPhraseFromAI()
+
+    console.log
+
+  }
   phraseArray: string[] = this.phrase.split('');
   key: string = '';
   currentIndex: number = 0;
