@@ -1,18 +1,9 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
 <main class="main">
   <div class="content">
     <div class="left-side">
       <h1>Hello, let's practice !</h1>
       <p class="letters">
-        @for (char of phrase; track $index; let i = $index) {
+        @for (char of phraseArray; track $index; let i = $index) {
         <span
           class="letter"
           [ngClass]="{
@@ -25,19 +16,9 @@
         </span>
         }
       </p>
+      <p>Mots par minutes: {{ wordsPerMinute }}</p>
+      <p>Accuracy: {{ accuracy}}</p>
       <p>Letter pressed: {{ key }}</p>
     </div>
   </div>
 </main>
-
-<router-outlet />
-
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-<router-outlet />

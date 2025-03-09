@@ -4,40 +4,64 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule],
+  imports: [CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 
 export class AppComponent {
-  phrase: string[] = 'Je vais'.split('');
+  phrase: string = 'Je vais pas pouvoir venir ce samedi';
+  phraseArray: string[] = this.phrase.split('');
   key: string = '';
   currentIndex: number = 0;
-  typedCharacters: { char: string, isCorrect: boolean }[] = [];
+  typedCharacters: { char: string, isCorrect: boolean, haveBeenMistype: boolean }[] = [];
+  mistypedCharacters: { [index: number]: string } = {};
+  startTime: Date = new Date();
+  wordsPerMinute: number = 0;
+  haveBeenMistype: boolean = false;
+  accuracy: number = -1;
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
     event.preventDefault()
-    if (this.currentIndex < this.phrase.length) {
+    // console.log(event.key)
+    if (this.currentIndex < this.phraseArray.length) {
       if (!["Shift", "AltGraph", "Control", "Alt"].includes(event.key)) {
         this.key = event.key;
-        const isCorrect = this.key === this.phrase[this.currentIndex];
-        
+        const isCorrect: boolean = this.key === this.phraseArray[this.currentIndex];
+
         // Stocker le caractère tapé et sa validité
         this.typedCharacters[this.currentIndex] = {
           char: this.key,
-          isCorrect: isCorrect
+          isCorrect: isCorrect,
+          haveBeenMistype: this.haveBeenMistype
         };
   
         // Avancer à la prochaine lettre seulement si la frappe est correcte
         if (isCorrect) {
-          if (this.currentIndex === this.phrase.length - 1) {
+          if (this.currentIndex === 0) {
+            this.startTime = new Date();
+          }
+          if (this.currentIndex === this.phraseArray.length - 1) {
+            const endTime = new Date();
+            const timeDiff = (endTime.getTime() - this.startTime.getTime()) / 60000; // Convert milliseconds to minutes
+            const nonSpaceCharacters = this.phraseArray.filter(char => char !== ' ').length;
+            this.wordsPerMinute = nonSpaceCharacters / (5 * timeDiff);
+            const totalTypedCharacters = this.phraseArray.length;
+            const correctCharacters = totalTypedCharacters - Object.keys(this.mistypedCharacters).length;
+            this.accuracy = (correctCharacters / totalTypedCharacters) * 100;
             this.currentIndex = 0
             this.typedCharacters = []
             this.key = ''
+            this.mistypedCharacters = {}
+            this.haveBeenMistype = false
           } else {
             this.currentIndex++;
           }
+          this.haveBeenMistype = false;
+        } else {
+          this.haveBeenMistype = true;
+          this.mistypedCharacters[this.currentIndex] = this.key;
         }
       }
     }
