@@ -1,6 +1,7 @@
 import { Component, HostListener, Injectable } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 interface LLMResponse {
   response: string
@@ -8,32 +9,14 @@ interface LLMResponse {
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 
-
-@Injectable({providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class AppComponent {
   phrase: string = 'Je vais pas pouvoir venir ce samedi';
-  constructor(private http: HttpClient) {
-    // function fetchPhraseFromAI() {
-      http.post<LLMResponse>('http://localhost:11434/api/generate', {
-        model: "llama3",
-        prompt: "Make me a French phrase of 20 words (just send me the phrase without anything else)?",
-        stream: false
-      }).subscribe(res => {
-        this.phraseArray = res.response.split('');
-        console.log("réponse de l'api : ", res.response)
-      })
-    // }
-
-    // fetchPhraseFromAI()
-
-    console.log
-
-  }
   phraseArray: string[] = this.phrase.split('');
   key: string = '';
   currentIndex: number = 0;
@@ -43,11 +26,37 @@ export class AppComponent {
   wordsPerMinute: number = 0;
   haveBeenMistype: boolean = false;
   accuracy: number = -1;
+  isLLMInfosFetching: boolean = true;
+  volume: number = 1.0;
+
+  constructor(private http: HttpClient) {
+    this.fetchPhrase();
+  }
+  
+  fetchPhrase() {
+    this.http.post<LLMResponse>('http://localhost:11434/api/generate', {
+      model: "llama3",
+      prompt: "Make me a French phrase of 20 words (just send me the phrase without anything else)?",
+      stream: false
+    }).subscribe(res => {
+      this.phraseArray = res.response.split('');
+      this.isLLMInfosFetching = false
+      console.log("réponse de l'api : ", res.response);
+    });
+  }
+
+  playSound(type: 'correct' | 'incorrect') {
+    const audio = new Audio();
+    audio.src = type === 'correct' ? 'assets/audio/correct.mp3' : 'assets/audio/incorrect.mp3';
+    audio.volume = this.volume;
+    audio.load();
+    audio.play();
+  }
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    event.preventDefault()
-    // console.log(event.key)
+    event.preventDefault();
+    console.log(event.key, event.code, event);
     if (this.currentIndex < this.phraseArray.length) {
       if (!["Shift", "AltGraph", "Control", "Alt"].includes(event.key)) {
         this.key = event.key;
@@ -59,7 +68,7 @@ export class AppComponent {
           isCorrect: isCorrect,
           haveBeenMistype: this.haveBeenMistype
         };
-  
+
         // Avancer à la prochaine lettre seulement si la frappe est correcte
         if (isCorrect) {
           if (this.currentIndex === 0) {
@@ -73,18 +82,22 @@ export class AppComponent {
             const totalTypedCharacters = this.phraseArray.length;
             const correctCharacters = totalTypedCharacters - Object.keys(this.mistypedCharacters).length;
             this.accuracy = (correctCharacters / totalTypedCharacters) * 100;
-            this.currentIndex = 0
-            this.typedCharacters = []
-            this.key = ''
-            this.mistypedCharacters = {}
-            this.haveBeenMistype = false
+            this.currentIndex = 0;
+            this.typedCharacters = [];
+            this.key = '';
+            this.mistypedCharacters = {};
+            this.haveBeenMistype = false;
+            this.isLLMInfosFetching = true;
+            this.fetchPhrase();
           } else {
             this.currentIndex++;
           }
           this.haveBeenMistype = false;
+          this.playSound('correct');
         } else {
           this.haveBeenMistype = true;
           this.mistypedCharacters[this.currentIndex] = this.key;
+          this.playSound('incorrect');
         }
       }
     }

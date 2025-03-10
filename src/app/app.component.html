@@ -2,23 +2,31 @@
   <div class="content">
     <div class="left-side">
       <h1>Hello, let's practice !</h1>
-      <p class="letters">
-        @for (char of phraseArray; track $index; let i = $index) {
-        <span
-          class="letter"
-          [ngClass]="{
-            current: i === currentIndex,
-            correct: typedCharacters[i] && typedCharacters[i].isCorrect,
-            incorrect: typedCharacters[i] && !typedCharacters[i].isCorrect
-          }"
-        >
-          {{ char === " " ? "_" : char }}
-        </span>
-        }
-      </p>
+      @if (isLLMInfosFetching) {
+        <p>Chargement...</p>
+      } @else {
+        <p class="letters">
+          @for (char of phraseArray; track $index; let i = $index) {
+          <span
+            class="letter"
+            [ngClass]="{
+              current: i === currentIndex,
+              correct: typedCharacters[i] && typedCharacters[i].isCorrect,
+              incorrect: typedCharacters[i] && !typedCharacters[i].isCorrect
+            }"
+          >
+            {{ char === " " ? "_" : char }}
+          </span>
+          }
+        </p>
+      }
       <p>Mots par minutes: {{ wordsPerMinute }}</p>
       <p>Accuracy: {{ accuracy}}</p>
       <p>Letter pressed: {{ key }}</p>
+      <p style="display: flex;">
+        <span>Volume :</span>
+        <input type="range" [(ngModel)]="volume" min="0" max="1" step="0.01">
+      </p>
     </div>
   </div>
 </main>
