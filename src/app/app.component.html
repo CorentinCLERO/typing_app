@@ -20,8 +20,8 @@
           }
         </p>
       }
-      <p>Mots par minutes: {{ wordsPerMinute }}</p>
-      <p>Accuracy: {{ accuracy}}</p>
+      <p>Mots par minutes: {{ globalWordsPerMinute === -1 ? 'Compléter une phrase' : globalWordsPerMinute }}</p>
+      <p>Accuracy: {{ accuracy === -1 ? 'Compléter une phrase' : accuracy }}</p>
       <p>Letter pressed: {{ key }}</p>
       <p style="display: flex;">
         <span>Volume :</span>
